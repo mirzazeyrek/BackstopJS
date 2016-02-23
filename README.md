@@ -1,5 +1,8 @@
 [![Build Status](https://travis-ci.org/garris/BackstopJS.svg)](https://travis-ci.org/garris/BackstopJS)
 
+#IMPORTANT NOTE:
+**This repo has some modifications in order to run huge tests based on BackstopJS. 
+
 #BackstopJS
 **Catch CSS curve balls.**
 
