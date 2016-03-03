@@ -19,18 +19,10 @@ var compareConfigFileName = config.paths.compare_data || 'compare/config.json';
 var viewports = config.viewports;
 var scenarios = config.scenarios||config.grabConfigs;
 
-  fs.touch(compareConfigFileName);
-  var compareConfigFile = fs.read(compareConfigFileName);
-  var compareConfigJSON = JSON.parse(compareConfigFile || '{}');
-
-
-
-var compareConfig = {testPairs: [], content: {}};
-var selectors = {};
+var compareConfig = {testPairs:[]};
 
 var casper = require("casper").create({
   // clientScripts: ["jquery.js"] // uncomment to add jQuery if you need that.
-  // TODO: if (config.debug) { add prop debug true }
 });
 
 if (config.debug) {
@@ -137,12 +129,6 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
 
       this.then(function(){
 
-        if ( !isReference && scenario.domReplay && casper.exists(o)) {
-          this.evaluate(function() {
-           //document.querySelector(o).innerHTML = compareConfigJSON;
-          });
-        }
-      
         this.echo('Screenshots for ' + vp.name + ' (' + (vp.width||vp.viewport.width) + 'x' + (vp.height||vp.viewport.height) + ')', 'info');
 
         //HIDE SELECTORS WE WANT TO AVOID
@@ -168,11 +154,10 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
             }
 
         //CREATE SCREEN SHOTS AND TEST COMPARE CONFIGURATION (CONFIG FILE WILL BE SAVED WHEN THIS PROCESS RETURNS)
-        // If no selectors are provided then set the default 'body'
-        if ( !scenario.hasOwnProperty('selectors') ) {
-          scenario.selectors = [ 'body' ];
-        }
-
+            // If no selectors are provided then set the default 'body'
+            if ( !scenario.hasOwnProperty('selectors') ) {
+              scenario.selectors = [ 'body' ];
+            }
         scenario.selectors.forEach(function(o,i,a){
           var cleanedSelectorName = o.replace(/[^a-z0-9_\-]/gi,'');//remove anything that's not a letter or a number
           var cleanedLabelName = scenario.label.replace(/[^a-z0-9_\-]/gi,'');
@@ -183,12 +168,9 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
           var test_FP       = bitmaps_test + '/' + screenshotDateTime + '/' + fileName;
 
           var filePath      = (isReference)?reference_FP:test_FP;
-          var selectorContent = "";
-       
+
 
           if (casper.exists(o)) {
-            selectorContent = this.evaluate(function() {return document.querySelector(o).outerHTML;});
-
             if (casper.visible(o)) {
               casper.captureSelector(filePath, o);
             } else {
@@ -210,8 +192,6 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
               label:scenario.label,
               misMatchThreshold: scenario.misMatchThreshold || config.misMatchThreshold
             });
-          } else {
-            selectors[o] = selectorContent;
           }
           //casper.echo('remote capture to > '+filePath,'info');
 
@@ -250,8 +230,10 @@ casper.run(function(){
 });
 
 function complete(){
+  fs.touch(compareConfigFileName);
+  var compareConfigFile = fs.read(compareConfigFileName);
+  var compareConfigJSON = JSON.parse(compareConfigFile || '{}');
   compareConfigJSON.compareConfig = compareConfig;
-  if (!isReference) { compareConfigJSON.content = selectors };
   fs.write(compareConfigFileName, JSON.stringify(compareConfigJSON,null,2), 'w');
   console.log(
     'Comparison config file updated.'

@@ -3,13 +3,16 @@
   "version": "1.1.0",
   "description": "BackstopJS: Catch CSS curveballs.",
   "scripts": {
-    "test": "mocha --reporter spec test/**/*spec*.js"
+    "test": "mocha --reporter spec test/**/*spec*.js",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/garris/backstopjs.git"
   },
-  "author": "https://github.com/garris/BackstopJS/graphs/contributors",
+  "author": {
+    "name": "https://github.com/garris/BackstopJS/graphs/contributors"
+  },
   "license": "MIT",
   "main": "",
   "devDependencies": {
@@ -35,5 +38,35 @@
     "require-dir": "^0.1.0",
     "underscore": "~1.6.0",
     "yargs": "~3.9.0"
-  }
+  },
+  "gitHead": "403cacc2b43f270d2217106217e80491f3465209",
+  "bugs": {
+    "url": "https://github.com/garris/backstopjs/issues"
+  },
+  "homepage": "https://github.com/garris/backstopjs",
+  "_id": "backstopjs@1.1.0",
+  "_shasum": "d79e830db64ae48ae27f3e17f906a684e99486db",
+  "_from": "backstopjs@*",
+  "_npmVersion": "2.7.4",
+  "_nodeVersion": "0.12.2",
+  "_npmUser": {
+    "name": "garris",
+    "email": "garris@me.com"
+  },
+  "dist": {
+    "shasum": "d79e830db64ae48ae27f3e17f906a684e99486db",
+    "tarball": "http://registry.npmjs.org/backstopjs/-/backstopjs-1.1.0.tgz"
+  },
+  "maintainers": [
+    {
+      "name": "garris",
+      "email": "garris@me.com"
+    }
+  ],
+  "_npmOperationalInternal": {
+    "host": "packages-6-west.internal.npmjs.com",
+    "tmp": "tmp/backstopjs-1.1.0.tgz_1454962731923_0.2828088141977787"
+  },
+  "directories": {},
+  "_resolved": "https://registry.npmjs.org/backstopjs/-/backstopjs-1.1.0.tgz"
 }

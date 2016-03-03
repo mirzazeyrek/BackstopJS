@@ -11,6 +11,7 @@ gulp.task('compare', function (done) {
   var simultanious_comparsion = 0;
   var total_comparsion = 1;
   var comparsion_available = 1;
+
   function updateProgress() {
     var results = {};
     _.each(compareConfig.testPairs, function (pair) {
@@ -39,8 +40,8 @@ gulp.task('compare', function (done) {
 
 
   _.each(compareConfig.testPairs, function (pair) {
-
     pair.testStatus = "running";
+
     var referencePath = path.join(paths.backstop, pair.reference);
     var testPath = path.join(paths.backstop, pair.test);
     var line = simultanious_comparsion;
@@ -55,38 +56,38 @@ gulp.task('compare', function (done) {
   });
 
   function startComparsion(testPath, referencePath, pair, line) {
-      if(fileExists(testPath) && fileExists(referencePath)) {
-        if(simultanious_comparsion>10 && comparsion_available > 10) {
-         // console.log(" waiting in line " + line + " simultanious comparsion " + simultanious_comparsion + " comparsion available " + comparsion_available);
-          setTimeout(function () { startComparsion(testPath, referencePath, pair, line);  },  1000 * (4));
+    if(fileExists(testPath) && fileExists(referencePath)) {
+      if(simultanious_comparsion>10 && comparsion_available > 10) {
+        // console.log(" waiting in line " + line + " simultanious comparsion " + simultanious_comparsion + " comparsion available " + comparsion_available);
+        setTimeout(function () { startComparsion(testPath, referencePath, pair, line);  },  1000 * (4));
 
-        } else {
-
-          console.log( "started - " + line);
-          comparsion_available++;
-          resemble(referencePath).compareTo(testPath).onComplete(function (data) {
-           // var imageComparisonFailed = !data.isSameDimensions || data.misMatchPercentage > pair.misMatchThreshold;
-            var imageComparisonFailed = data.misMatchPercentage > pair.misMatchThreshold;
-            if (imageComparisonFailed) {
-              console.log('mismatch : ', pair.misMatchThreshold, data.misMatchPercentage);
-              pair.testStatus = "fail";
-              console.log('ERROR:', pair.label, pair.fileName);
-              storeFailedDiffImage(testPath, data);
-              comparsion_available--;
-            } else {
-              pair.testStatus = "pass";
-              comparsion_available--;
-              console.log('OK:', pair.label, pair.fileName);
-            }
-
-            updateProgress();
-          });
-
-        }
       } else {
 
+        console.log( "started - " + line);
+        comparsion_available++;
+        resemble(referencePath).compareTo(testPath).onComplete(function (data) {
+          // var imageComparisonFailed = !data.isSameDimensions || data.misMatchPercentage > pair.misMatchThreshold;
+          var imageComparisonFailed = data.misMatchPercentage > pair.misMatchThreshold;
+          if (imageComparisonFailed) {
+            console.log('mismatch : ', pair.misMatchThreshold, data.misMatchPercentage);
+            pair.testStatus = "fail";
+            console.log('ERROR:', pair.label, pair.fileName);
+            storeFailedDiffImage(testPath, data);
+            comparsion_available--;
+          } else {
+            pair.testStatus = "pass";
+            comparsion_available--;
+            console.log('OK:', pair.label, pair.fileName);
+          }
+
+          updateProgress();
+        });
+
       }
-      updateProgress();
+    } else {
+
+    }
+    updateProgress();
   }
 
   function storeFailedDiffImage(testPath, data) {
@@ -117,6 +118,5 @@ gulp.task('compare', function (done) {
       return false; // something else went wrong, we don't have rights, ...
     }
   }
-
 
 });
