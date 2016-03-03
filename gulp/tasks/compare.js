@@ -58,36 +58,35 @@ gulp.task('compare', function (done) {
       if(fileExists(testPath) && fileExists(referencePath)) {
         if(simultanious_comparsion>10 && comparsion_available > 10) {
          // console.log(" waiting in line " + line + " simultanious comparsion " + simultanious_comparsion + " comparsion available " + comparsion_available);
-          setTimeout(function () { startComparsion(testPath, referencePath, pair, line);  },  1000 * (5));
+          setTimeout(function () { startComparsion(testPath, referencePath, pair, line);  },  1000 * (4));
 
         } else {
 
           console.log( "started - " + line);
           comparsion_available++;
           resemble(referencePath).compareTo(testPath).onComplete(function (data) {
-            var imageComparisonFailed = !data.isSameDimensions || data.misMatchPercentage > pair.misMatchThreshold;
-
+           // var imageComparisonFailed = !data.isSameDimensions || data.misMatchPercentage > pair.misMatchThreshold;
+            var imageComparisonFailed = data.misMatchPercentage > pair.misMatchThreshold;
             if (imageComparisonFailed) {
+              console.log('mismatch : ', pair.misMatchThreshold, data.misMatchPercentage);
               pair.testStatus = "fail";
               console.log('ERROR:', pair.label, pair.fileName);
               storeFailedDiffImage(testPath, data);
               comparsion_available--;
-              console.log( "finished - " + line);
             } else {
               pair.testStatus = "pass";
               comparsion_available--;
               console.log('OK:', pair.label, pair.fileName);
-              console.log( "finished - " + line);
             }
 
-
+            updateProgress();
           });
 
         }
       } else {
-        updateProgress();
-      }
 
+      }
+      updateProgress();
   }
 
   function storeFailedDiffImage(testPath, data) {
