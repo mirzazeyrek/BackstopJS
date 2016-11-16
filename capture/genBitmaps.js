@@ -12,6 +12,26 @@ if (!config.paths) {
   config.paths = {};
 }
 
+
+var test_case = false;
+console.log(" test_case " + test_case);
+if(config.hasOwnProperty('test_case')){
+  test_case = true;
+  var test_case_url = config.test_case.url;
+  var test_case_referenceUrl = config.test_case.referenceUrl;
+  var test_case_screenshotDateTime = config.test_case.screenshotDateTime;
+  var test_case_viewport = config.test_case.viewport;
+  var test_case_label = config.test_case.label;
+  var test_case_checkReference = config.test_case.checkReference;
+  console.log("test_case_url " + test_case_url);
+  console.log("test_case_referenceUrl " + test_case_referenceUrl);
+  console.log("test_case_screenshotDateTime " + test_case_screenshotDateTime);
+  console.log("test_case_viewport " + test_case_viewport);
+  console.log("test_case_label " + test_case_label);
+  console.log("test_case_checkReference " + test_case_checkReference);
+}
+
+var checkReference = "";
 var bitmaps_reference = config.paths.bitmaps_reference || 'bitmaps_reference';
 var bitmaps_test = config.paths.bitmaps_test || 'bitmaps_test';
 var casper_scripts = config.paths.casper_scripts || null;
@@ -55,6 +75,8 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
     screenshotNow = new Date(),
     screenshotDateTime = screenshotNow.getFullYear() + pad(screenshotNow.getMonth() + 1) + pad(screenshotNow.getDate()) + '-' + pad(screenshotNow.getHours()) + pad(screenshotNow.getMinutes()) + pad(screenshotNow.getSeconds());
 
+  if(test_case)
+      screenshotDateTime = test_case_screenshotDateTime;
 
   var consoleBuffer = '';
   var scriptTimeout = 20000;
@@ -70,51 +92,71 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
   casper.each(scenarios,function(casper, scenario, scenario_index){
 
     casper.each(viewports, function(casper, vp, viewport_index) {
-      this.then(function() {
-        this.viewport(vp.width||vp.viewport.width, vp.height||vp.viewport.height);
-      });
+      // added conditions for only if test case is active
+ //     console.log("scenario url " + scenario.url);
+ //     console.log("test case url  " + test_case_url);
+      console.log(" checking ");
+      if ((test_case && (test_case_label == scenario.label) ) || (test_case == false)) {
 
-      var url = scenario.url;
-      if (isReference && scenario.referenceUrl) {
-        url = scenario.referenceUrl;
+        this.then(function () {
+          this.viewport(vp.width || vp.viewport.width, vp.height || vp.viewport.height);
+        });
+
+        var url = scenario.url;
+        if (isReference && scenario.referenceUrl) {
+          url = scenario.referenceUrl;
+        }
+
+      if(test_case) {
+        url = test_case_url;
       }
+      if(test_case && isReference) {
+        url = test_case_referenceUrl;
+      }
+
+
+        console.log("check confirmed current url " + url);
 
       var onBeforeScript = scenario.onBeforeScript || config.onBeforeScript;
       if (onBeforeScript) {
         require(getScriptPath(onBeforeScript))(casper, scenario, vp);
       }
 
-      this.thenOpen(url, function() {
+      this.thenOpen(url, function () {
         casper.waitFor(
-          function(){ //test
-            var readyEvent = scenario.readyEvent || config.readyEvent;
-            if(!readyEvent) {
-              return true;
+            function () { //test
+              var readyEvent = scenario.readyEvent || config.readyEvent;
+              if (!readyEvent) {
+                return true;
+              }
+              var regExReadyFlag = new RegExp(readyEvent, 'i');
+              return consoleBuffer.search(regExReadyFlag) >= 0;
             }
-            var regExReadyFlag = new RegExp(readyEvent,'i');
-            return consoleBuffer.search(regExReadyFlag) >= 0;
-          }
-          ,function(){//on done
-            consoleBuffer = '';
-            casper.echo('Ready event received.');
-          }
-          ,function(){casper.echo('ERROR: casper timeout.')} //on timeout
-          ,scriptTimeout
+            , function () {//on done
+              consoleBuffer = '';
+              casper.echo('Ready event received.');
+            }
+            , function () {
+              casper.echo('ERROR: casper timeout.')
+            } //on timeout
+            , scriptTimeout
         );
-        casper.wait(scenario.delay||1);
+        casper.wait(scenario.delay || 1);
       });
 
-      casper.then(function() {
+      casper.then(function () {
         this.echo('Current location is ' + url, 'info');
 
         if (config.debug) {
-          var src = this.evaluate(function() {return document.body.outerHTML; });
+          var src = this.evaluate(function () {
+            return document.body.outerHTML;
+          });
           this.echo(src);
         }
       });
 
       // Custom casperjs scripting after ready event and delay
-      casper.then(function() {
+      casper.then(function () {
         // onReadyScript files should export a module like so:
         //
         // module.exports = function(casper, scenario, vp) {
@@ -127,52 +169,55 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
         }
       });
 
-      this.then(function(){
+      this.then(function () {
 
-        this.echo('Screenshots for ' + vp.name + ' (' + (vp.width||vp.viewport.width) + 'x' + (vp.height||vp.viewport.height) + ')', 'info');
+        this.echo('Screenshots for ' + vp.name + ' (' + (vp.width || vp.viewport.width) + 'x' + (vp.height || vp.viewport.height) + ')', 'info');
 
         //HIDE SELECTORS WE WANT TO AVOID
-            if ( scenario.hasOwnProperty('hideSelectors') ) {
-              scenario.hideSelectors.forEach(function(o,i,a){
-                casper.evaluate(function(o){
-                  Array.prototype.forEach.call(document.querySelectorAll(o), function(s, j){
-                    s.style.visibility='hidden';
-                  });
-                },o);
+        if (scenario.hasOwnProperty('hideSelectors')) {
+          scenario.hideSelectors.forEach(function (o, i, a) {
+            casper.evaluate(function (o) {
+              Array.prototype.forEach.call(document.querySelectorAll(o), function (s, j) {
+                s.style.visibility = 'hidden';
               });
-            }
+            }, o);
+          });
+        }
 
         //REMOVE UNWANTED SELECTORS FROM RENDER TREE
-            if ( scenario.hasOwnProperty('removeSelectors') ) {
-              scenario.removeSelectors.forEach(function(o,i,a){
-                casper.evaluate(function(o){
-                  Array.prototype.forEach.call(document.querySelectorAll(o), function(s, j){
-                    s.style.display='none';
-                  });
-                },o);
+        if (scenario.hasOwnProperty('removeSelectors')) {
+          scenario.removeSelectors.forEach(function (o, i, a) {
+            casper.evaluate(function (o) {
+              Array.prototype.forEach.call(document.querySelectorAll(o), function (s, j) {
+                s.style.display = 'none';
               });
-            }
+            }, o);
+          });
+        }
 
         //CREATE SCREEN SHOTS AND TEST COMPARE CONFIGURATION (CONFIG FILE WILL BE SAVED WHEN THIS PROCESS RETURNS)
-            // If no selectors are provided then set the default 'body'
-            if ( !scenario.hasOwnProperty('selectors') ) {
-              scenario.selectors = [ 'body' ];
-            }
-        scenario.selectors.forEach(function(o,i,a){
-          var cleanedSelectorName = o.replace(/[^a-z0-9_\-]/gi,'');//remove anything that's not a letter or a number
-          var cleanedLabelName = scenario.label.replace(/[^a-z0-9_\-]/gi,'');
+        // If no selectors are provided then set the default 'body'
+        if (!scenario.hasOwnProperty('selectors')) {
+          scenario.selectors = ['body'];
+        }
+        scenario.selectors.forEach(function (o, i, a) {
+          var cleanedSelectorName = o.replace(/[^a-z0-9_\-]/gi, '');//remove anything that's not a letter or a number
+          var cleanedLabelName = scenario.label.replace(/[^a-z0-9_\-]/gi, '');
           //var cleanedUrl = scenario.url.replace(/[^a-zA-Z\d]/,'');//remove anything that's not a letter or a number
-          var fileName = cleanedLabelName + '_' + scenario_index + '_' + i + '_' + cleanedSelectorName + '_' + viewport_index + '_' + vp.name + '.png';;
+          var fileName = cleanedLabelName + '_' + scenario_index + '_' + i + '_' + cleanedSelectorName + '_' + viewport_index + '_' + vp.name + '.jpg';
 
-          var reference_FP  = bitmaps_reference + '/' + fileName;
-          var test_FP       = bitmaps_test + '/' + screenshotDateTime + '/' + fileName;
 
-          var filePath      = (isReference)?reference_FP:test_FP;
+          var reference_FP = bitmaps_reference + '/' + fileName;
+          var test_FP = bitmaps_test + '/' + screenshotDateTime + '/' + fileName;
+
+          var filePath = (isReference) ? reference_FP : test_FP;
 
 
           if (casper.exists(o)) {
             if (casper.visible(o)) {
               casper.captureSelector(filePath, o);
+              if(test_case)
+              fs.write(bitmaps_reference + '/' + test_case_checkReference,"true",'b');
             } else {
               var assetData = fs.read(hiddenSelectorPath, 'b');
               fs.write(filePath, assetData, 'b');
@@ -182,14 +227,15 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
             fs.write(filePath, assetData, 'b');
           }
 
-
+          console.log("!isReference " + isReference);
           if (!isReference) {
+            console.log("!isReference 2 " + isReference);
             compareConfig.testPairs.push({
-              reference:reference_FP,
-              test:test_FP,
-              selector:o,
-              fileName:fileName,
-              label:scenario.label,
+              reference: reference_FP,
+              test: test_FP,
+              selector: o,
+              fileName: fileName,
+              label: scenario.label,
               misMatchThreshold: scenario.misMatchThreshold || config.misMatchThreshold
             });
           }
@@ -198,7 +244,7 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
         });//end topLevelModules.forEach
 
       });
-
+    }
     });//end casper.each viewports
 
   });//end casper.each scenario
@@ -209,10 +255,20 @@ function capturePageSelectors(url,scenarios,viewports,bitmaps_reference,bitmaps_
 //========================
 //this query should be moved to the prior process
 //`isReference` could be better passed as env parameter
-var exists = fs.exists(bitmaps_reference);
+if(test_case) {
+checkReference = bitmaps_reference + '/' + test_case_checkReference;
+} else {
+checkReference = bitmaps_reference;
+}
+var exists = fs.exists(checkReference);
 var isReference = false;
-if(!exists){isReference=true; console.log('CREATING NEW REFERENCE FILES')}
+if(!exists){
+  isReference=true;
+  console.log('CREATING NEW REFERENCE FILES')
+}
+
 //========================
+
 
 
 capturePageSelectors(

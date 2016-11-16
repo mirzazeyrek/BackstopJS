@@ -150,3 +150,19 @@ compareApp.controller('MainCtrl', function ($scope, $route, $routeParams, $q, $h
 
 
 });
+
+
+resemble.outputSettings(resembleTestConfig);
+
+var resembleTestConfig = {
+  errorColor: {red: 255, green: 0, blue: 255},
+  errorType: 'movement',
+  transparency: 0.1,
+  largeImageThreshold: 1200
+};
+
+var defaultMisMatchThreshold = 1;
+var ref = "../testing/backstop_data/bitmaps_reference/chrome_jupiter_518_fixed_links_03_08_2016_09_19_51/1_employees_1_0_0_mk-theme-container_0_phone.png";
+var test = "../testing/backstop_data/bitmaps_test/chrome_jupiter_518_fixed_links_03_08_2016_09_19_51/20160803-111634/1_employees_1_0_0_mk-theme-container_0_phone.png";
+var diff = resemble(ref).compareTo(test).onComplete(function(diffData){
+});

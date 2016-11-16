@@ -34,7 +34,7 @@
     "gulp-rename": "^1.2.0",
     "http-proxy": "~1.1.4",
     "is-running": "~1.0.5",
-    "node-resemble-js": "0.0.4",
+    "node-resemble-js": "2.2.1",
     "require-dir": "^0.1.0",
     "underscore": "~1.6.0",
     "yargs": "~3.9.0"

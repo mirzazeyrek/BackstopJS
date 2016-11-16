@@ -75,11 +75,18 @@ gulp.task('compare', function (done) {
             storeFailedDiffImage(testPath, data);
             comparsion_available--;
           } else {
+            console.log('mismatch : ', pair.misMatchThreshold, data.misMatchPercentage);
             pair.testStatus = "pass";
             comparsion_available--;
             console.log('OK:', pair.label, pair.fileName);
+            var get_diff_path = getFailedDiffFilename(testPath);
+            if(fileExists(get_diff_path))
+              fs.unlink(get_diff_path);
+            get_diff_path = get_diff_path.replace(".png",".jpg");
+            if(fileExists(get_diff_path))
+                fs.unlink(get_diff_path);
           }
-
+          storeFailedDiffImageMismatch(testPath, data.misMatchPercentage);
           updateProgress();
         });
 
@@ -90,6 +97,18 @@ gulp.task('compare', function (done) {
     updateProgress();
   }
 
+  function getFailedDiffFilename(testPath) {
+    var lastSlash = testPath.lastIndexOf(path.sep);
+    return testPath.slice(0, lastSlash + 1) + 'failed_diff_' + testPath.slice(lastSlash + 1, testPath.length);
+  }
+
+  function getFailedDiffFilenameMismatch(testPath, misMatch) {
+    var lastSlash = testPath.lastIndexOf(path.sep);
+    var filename = testPath.slice(0, lastSlash + 1) + testPath.slice(lastSlash + 1, testPath.length) + '-misMatch-' + misMatch;
+    filename = filename.replace(".png","");
+    return filename;
+  }
+
   function storeFailedDiffImage(testPath, data) {
     var failedDiffFilename = getFailedDiffFilename(testPath);
     console.log('Storing diff image in ', failedDiffFilename);
@@ -97,10 +116,15 @@ gulp.task('compare', function (done) {
     data.getDiffImage().pack().pipe(failedDiffStream)
   }
 
-  function getFailedDiffFilename(testPath) {
-    var lastSlash = testPath.lastIndexOf(path.sep);
-    return testPath.slice(0, lastSlash + 1) + 'failed_diff_' + testPath.slice(lastSlash + 1, testPath.length);
+  function storeFailedDiffImageMismatch(testPath, misMatch) {
+    var failedDiffFilename = getFailedDiffFilenameMismatch(testPath, misMatch);
+    console.log('Storing MisMatch in ', failedDiffFilename);
+    fs.createWriteStream(failedDiffFilename);
   }
+
+
+
+
 
   function fileExists(path) {
 

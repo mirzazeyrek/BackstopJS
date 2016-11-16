@@ -6,8 +6,10 @@ var updateCompareConfigs = require('../util/updateCompareConfig');
 
 //BLESS THE CURRENT CAPTURE CONFIG
 gulp.task('bless',function() {
+    console.log(paths.activeCaptureConfigPath);
   var config = fsx.readFileSync(paths.activeCaptureConfigPath, 'utf8');
   updateCompareConfigs(function(compareConfig) {
       compareConfig.lastConfigHash = checksum(config);
   });
+    console.log("finished bless");
 });

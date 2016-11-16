@@ -67,11 +67,19 @@ if(fs.existsSync(paths.activeCaptureConfigPath)){
     paths.casper_scripts = config.paths.casper_scripts || null;
   }
 
+  paths.test_case = false;
+
+  if(config.hasOwnProperty('test_case')) {
+    paths.test_case = true;
+  }
+
   paths.portNumber = config.port || defaultPort;
   paths.cliExitOnFail = config.cliExitOnFail || false;
   paths.casperFlags = config.casperFlags || null;
   paths.engine = config.engine || null;
   paths.report = config.report || null;
+
+
 }
 
 paths.compareReportURL = 'http://localhost:' + paths.portNumber + '/compare/';
