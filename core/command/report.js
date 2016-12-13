@@ -24,7 +24,12 @@ function writeBrowserReport (config, reporter) {
     }
     return path.join(config.projectPath, p);
   }
-  logger.log('Writing browser report');
+  // console.log(config.testReportFileName);
+  // var htmlReportSubPath = config.testReportFileName || "";
+  // if(htmlReportSubPath)
+  // config.html_report = config.html_report + config.testReportFileName.replace(/\.xml$/, '');
+
+  logger.log('Writing browser report : ' + config.html_report);
   return fs.copy(config.comparePath, toAbsolute(config.html_report)).then(function () {
     logger.log('Browser reported copied');
 
@@ -59,7 +64,8 @@ function writeBrowserReport (config, reporter) {
 
 function writeJunitReport (config, reporter) {
   logger.log('Writing jUnit Report');
-  var testReportFileName = config.ciReport.testReportFileName.replace(/\.xml$/, '') + '.xml';
+  var testReportFilename = config.testReportFileName || config.ciReport.testReportFileName;
+  testReportFileName = testReportFilename.replace(/\.xml$/, '') + '.xml';
 
   var testSuite = junitWriter.addTestsuite(reporter.testSuite);
 

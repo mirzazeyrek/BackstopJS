@@ -22,6 +22,10 @@ function getCasperArgs (config, tests) {
 
 module.exports = function (config, tests) {
   var casperArgs = getCasperArgs(config, tests);
+  console.log("testReportFileName 26 " + config.testReportFileName);
+  if(config.testReportFileName) {
+    casperArgs[casperArgs.length] = "--testReportFileName=" + config.testReportFileName.replace(/\.xml$/, '');
+  }
 
   console.log('\nRunning CasperJS with: ', casperArgs);
 

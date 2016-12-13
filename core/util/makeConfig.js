@@ -11,6 +11,15 @@ function projectPath(config) {
 }
 
 function loadProjectConfig(command, options, config) {
+
+  // TEST REPORT FILE NAME
+  console.log(options.testReportFileName);
+  var customTestReportFileName = options && (options.testReportFileName || null);
+  if(customTestReportFileName) {
+    config.testReportFileName = options.testReportFileName || null;
+    console.log(options.testReportFileName);
+  }
+
   var customConfigPath = options && (options.backstopConfigFilePath || options.configPath || options.config);
   if (customConfigPath) {
     if (path.isAbsolute(customConfigPath)) {

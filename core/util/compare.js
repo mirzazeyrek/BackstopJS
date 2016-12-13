@@ -2,23 +2,32 @@ var resemble = require('node-resemble-js');
 var path = require('path');
 var map = require('bluebird').map;
 
-var fs = require('./fs');
+var fs = require('fs');
 var streamToPromise = require('./streamToPromise');
 var Reporter = require('./Reporter');
 var logger = require('./logger')('compare');
 
-var ASYNC_COMPARE_LIMIT = 20;
+var MAX_COMPARISONS_CONCURRENCY = 1;
 
 function storeFailedDiffImage (testPath, data) {
   var failedDiffFilename = getFailedDiffFilename(testPath);
   console.log('   See:', failedDiffFilename);
 
   var failedDiffStream = fs.createWriteStream(failedDiffFilename);
-  var storageStream = data.getDiffImage()
-    .pack()
-    .pipe(failedDiffStream);
+  var ext = failedDiffFilename.substring(failedDiffFilename.lastIndexOf(".")+1);
+  console.log("ext : " + ext);
 
-  return streamToPromise(storageStream, failedDiffFilename);
+  if(ext=="png") {
+    var storageStream = data.getDiffImage()
+        .pack()
+        .pipe(failedDiffStream);
+    return streamToPromise(storageStream, failedDiffFilename);
+  }
+
+  if(ext=="jpg" || ext=="jpeg") {
+    fs.writeFileSync(failedDiffFilename, data.getDiffImageAsJPEG());
+    return Promise.resolve(failedDiffFilename);
+  }
 }
 
 function getFailedDiffFilename (testPath) {
@@ -38,9 +47,9 @@ function compareImage (referencePath, testPath, resembleOutputSettings) {
 
     resemble.outputSettings(resembleOutputSettings || {});
     resemble(referencePath).compareTo(testPath)
-      .onComplete(function (data) {
-        resolve(data);
-      });
+        .onComplete(function (data) {
+          resolve(data);
+        });
   });
 }
 
@@ -62,8 +71,6 @@ module.exports = function (config) {
         if (data.isSameDimensions && data.misMatchPercentage <= pair.misMatchThreshold) {
           Test.status = 'pass';
           logger.success('OK: ' + pair.label + ' ' + pair.fileName);
-          data = null;
-          pair.diff.getDiffImage = null;
 
           return pair;
         }
@@ -73,13 +80,11 @@ module.exports = function (config) {
 
         return storeFailedDiffImage(testPath, data).then(function (compare) {
           pair.diffImage = compare;
-          data = null;
-          pair.diff.getDiffImage = null;
 
           return pair;
         });
       });
-  }, { concurrency: config.asyncCompareLimit || ASYNC_COMPARE_LIMIT }).then(function () {
+  }, {concurrency: MAX_COMPARISONS_CONCURRENCY}).then(function () {
     return report;
   });
 };

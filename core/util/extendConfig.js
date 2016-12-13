@@ -14,7 +14,6 @@ function extendConfig(config, userConfig) {
   config.defaultMisMatchThreshold = 0.1;
   config.debug = userConfig.debug || false;
   config.resembleOutputOptions = userConfig.resembleOutputOptions;
-  config.asyncCompareLimit = userConfig.asyncCompareLimit;
   return config;
 }
 
@@ -46,7 +45,6 @@ function ci(config, userConfig) {
     };
   }
 }
-
 function htmlReport(config, userConfig) {
   config.html_report = path.join(config.projectPath, 'backstop_data', 'html_report');
   config.openReport = userConfig.openReport || true;
@@ -54,6 +52,10 @@ function htmlReport(config, userConfig) {
   if (userConfig.paths) {
     config.html_report = userConfig.paths.html_report || config.html_report;
   }
+
+  var htmlReportSubPath = config.testReportFileName || "";
+  if(htmlReportSubPath)
+    config.html_report = config.html_report + config.testReportFileName.replace(/\.xml$/, '');
 
   config.compareConfigFileName = path.join(config.html_report, 'config.js');
   config.compareReportURL = path.join(config.html_report, 'index.html');
@@ -65,7 +67,14 @@ function comparePaths(config) {
 }
 
 function captureConfigPaths(config) {
-  config.captureConfigFileName = path.join(config.backstop, 'capture', 'config.json');
+  var htmlReportSubPath = config.testReportFileName || "";
+  if(htmlReportSubPath)
+    htmlReportSubPath = config.testReportFileName.replace(/\.xml$/, '')+'-';
+  config.captureConfigFileName = path.join(config.backstop, 'capture', htmlReportSubPath+'config.json');
+
+
+
+  console.log("captureConfigFileName " + config.captureConfigFileName);
   config.captureConfigFileNameDefault = path.join(config.backstop, 'capture', 'config.default.json');
 }
 

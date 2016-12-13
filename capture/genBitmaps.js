@@ -1,19 +1,41 @@
 /* eslint-disable no-path-concat */
 var DOCUMENT_SELECTOR = 'document';
-
 var fs = require('fs');
 var cwd = fs.workingDirectory;
+var system = require('system');
+var args = system.args;
+var testReportFileName = "";
+if (args.length === 1) {
+  console.log('Try to pass some arguments when invoking this script!');
+} else {
+  args.forEach(function(arg, i) {
+    arg = arg.split('--');
+    if(arg[1]) {
+      arg = arg[1].split('=');
+      val = arg[1];
+      index = arg[0];
+      if(index=="testReportFileName")
+        testReportFileName = val+"-";
+    }
+  });
+}
+
 var scriptName = fs.absolute(require('system').args[3]);
 var __dirname = scriptName.substring(0, scriptName.lastIndexOf('/'));
 
 var selectorNotFoundPath = __dirname + '/resources/selectorNotFound_noun_164558_cc.png';
 var hiddenSelectorPath = __dirname + '/resources/hiddenSelector_noun_63405.png';
-var genConfigPath = __dirname + '/config.json'; // TODO :: find a way to use that directly from the main configuration
+var genConfigPath = __dirname + '/'+testReportFileName+'config.json'; // TODO :: find a way to use that directly from the main configuration
+console.log("genConfigPath " + genConfigPath);
+
+
 
 var config = require(genConfigPath);
 if (!config.paths) {
   config.paths = {};
 }
+
+
 
 var bitmapsReferencePath = config.paths.bitmaps_reference || 'bitmaps_reference';
 var bitmapsTestPath = config.paths.bitmaps_test || 'bitmaps_test';
@@ -83,10 +105,9 @@ function processScenario (casper, scenario, scenarioOrVariantLabel, scenarioLabe
     this.then(function () {
       this.viewport(vp.width || vp.viewport.width, vp.height || vp.viewport.height);
     });
-
-    var url = scenario.url;
+    var url = config.baseTestUrl + scenario.url;
     if (isReference && scenario.referenceUrl) {
-      url = scenario.referenceUrl;
+      url = config.baseReferenceUrl + scenario.referenceUrl;
     }
 
     var onBeforeScript = scenario.onBeforeScript || config.onBeforeScript;
@@ -173,7 +194,7 @@ function processScenario (casper, scenario, scenarioOrVariantLabel, scenarioLabe
         scenario.selectors = [DOCUMENT_SELECTOR];
       }
 
-      if (scenario.selectorExpansion) {
+      if (scenario.selectorExpansion === true) {
         scenario.selectorsExpanded = scenario.selectors.reduce(function(acc, selector) {
           if (selector === DOCUMENT_SELECTOR) {
             return acc.concat([DOCUMENT_SELECTOR])
@@ -223,9 +244,13 @@ function processScenario (casper, scenario, scenarioOrVariantLabel, scenarioLabe
           .replace(/\{viewportIndex\}/, viewportIndex)
           .replace(/\{viewportLabel\}/, makeSafe(vp.name))
           .replace(/[^a-z0-9_\-]/gi, ''); // remove anything that's not a letter or a number or dash or underscore.
-
+/*
         if (!/\.png$/i.test(fileName)) {
           fileName = fileName + '.png';
+        }
+*/
+        if (!/\.jpg$/i.test(fileName)) {
+          fileName = fileName + '.jpg';
         }
 
         var referenceFilePath = bitmapsReferencePath + '/' + fileName;
