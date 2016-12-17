@@ -4,7 +4,7 @@ var fs = require('fs');
 var hash = require('object-hash');
 const tmpdir = require('os').tmpdir();
 
-function extendConfig(config, userConfig) {
+function extendConfig (config, userConfig) {
   bitmapPaths(config, userConfig);
   ci(config, userConfig);
   htmlReport(config, userConfig);
@@ -21,7 +21,7 @@ function extendConfig(config, userConfig) {
   return config;
 }
 
-function bitmapPaths(config, userConfig) {
+function bitmapPaths (config, userConfig) {
   config.bitmaps_reference = path.join(config.projectPath, 'backstop_data', 'bitmaps_reference');
   config.bitmaps_test = path.join(config.projectPath, 'backstop_data', 'bitmaps_test');
   if (userConfig.paths) {
@@ -30,7 +30,7 @@ function bitmapPaths(config, userConfig) {
   }
 }
 
-function ci(config, userConfig) {
+function ci (config, userConfig) {
   config.ci_report = path.join(config.projectPath, 'backstop_data', 'ci_report');
   if (userConfig.paths) {
     config.ci_report = userConfig.paths.ci_report || config.ci_report;
@@ -50,7 +50,7 @@ function ci(config, userConfig) {
   }
 }
 
-function htmlReport(config, userConfig) {
+function htmlReport (config, userConfig) {
   config.html_report = path.join(config.projectPath, 'backstop_data', 'html_report');
   config.openReport = userConfig.openReport || true;
 
@@ -62,24 +62,24 @@ function htmlReport(config, userConfig) {
   config.compareReportURL = path.join(config.html_report, 'index.html');
 }
 
-function comparePaths(config) {
+function comparePaths (config) {
   config.comparePath = path.join(config.backstop, 'compare');
   config.tempCompareConfigFileName = temp.path({suffix: '.json'});
 }
 
-function captureConfigPaths(config) {
+function captureConfigPaths (config) {
   var captureDir = path.join(tmpdir, 'capture');
-  if (!fs.existsSync(captureDir)){
-      fs.mkdirSync(captureDir);
+  if (!fs.existsSync(captureDir)) {
+    fs.mkdirSync(captureDir);
   }
   var configHashable = config;
-  configHashable.tempCompareConfigFileName = "";
+  configHashable.tempCompareConfigFileName = '';
   var configHash = hash(configHashable);
   config.captureConfigFileName = path.join(tmpdir, 'capture', configHash + '.json');
   config.captureConfigFileNameDefault = path.join(config.backstop, 'capture', 'config.default.json');
 }
 
-function casper(config, userConfig) {
+function casper (config, userConfig) {
   config.casper_scripts = path.join(config.projectPath, 'backstop_data', 'casper_scripts');
   config.casper_scripts_default = path.join(config.backstop, 'capture', 'casper_scripts');
 
