@@ -1,5 +1,8 @@
 var path = require('path');
 var temp = require('temp');
+var fs = require('fs');
+var hash = require('object-hash');
+const tmpdir = require('os').tmpdir();
 
 function extendConfig(config, userConfig) {
   bitmapPaths(config, userConfig);
@@ -65,7 +68,14 @@ function comparePaths(config) {
 }
 
 function captureConfigPaths(config) {
-  config.captureConfigFileName = path.join(config.backstop, 'capture', 'config.json');
+  var captureDir = path.join(tmpdir, 'capture');
+  if (!fs.existsSync(captureDir)){
+      fs.mkdirSync(captureDir);
+  }
+  var configHashable = config;
+  configHashable.tempCompareConfigFileName = "";
+  var configHash = hash(configHashable);
+  config.captureConfigFileName = path.join(tmpdir, 'capture', configHash + '.json');
   config.captureConfigFileNameDefault = path.join(config.backstop, 'capture', 'config.default.json');
 }
 
