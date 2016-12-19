@@ -22,8 +22,8 @@ function getCasperArgs (config, tests) {
 
 module.exports = function (config, tests) {
   var casperArgs = getCasperArgs(config, tests);
-  if(config.captureConfigFileName) {
-    casperArgs[casperArgs.length] = "--captureConfigFileName=" + config.captureConfigFileName;
+  if (config.captureConfigFileName) {
+    casperArgs[casperArgs.length] = '--captureConfigFileName=' + config.captureConfigFileName;
   }
 
   console.log('\nRunning CasperJS with: ', casperArgs);
