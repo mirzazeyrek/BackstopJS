@@ -5,8 +5,8 @@ var fs = require('fs');
 var cwd = fs.workingDirectory;
 var system = require('system');
 var args = system.args;
+var val, index, captureConfigFileName;
 if (args.length !== 1) {
-  var val, index, captureConfigFileName;
   args.forEach(function (arg, i) {
     arg = arg.split('--');
     if (arg[1]) {

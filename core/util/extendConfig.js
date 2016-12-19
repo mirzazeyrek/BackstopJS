@@ -72,9 +72,10 @@ function captureConfigPaths (config) {
   if (!fs.existsSync(captureDir)) {
     fs.mkdirSync(captureDir);
   }
-  var configHashable = config;
-  configHashable.tempCompareConfigFileName = '';
-  var configHash = hash(configHashable);
+  var tempCompareConfigFileName = config.tempCompareConfigFileName;
+  config.tempCompareConfigFileName = '';
+  var configHash = hash(config);
+  config.tempCompareConfigFileName = tempCompareConfigFileName;
   config.captureConfigFileName = path.join(tmpdir, 'capture', configHash + '.json');
   config.captureConfigFileNameDefault = path.join(config.backstop, 'capture', 'config.default.json');
 }
