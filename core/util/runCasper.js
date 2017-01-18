@@ -27,6 +27,10 @@ module.exports = function (config, tests) {
     casperArgs[casperArgs.length] = "--testReportFileName=" + config.testReportFileName.replace(/\.xml$/, '');
   }
 
+  if(config.engine) {
+      casperArgs[casperArgs.length] = "--engineType=" + config.engine;
+  }
+
   console.log('\nRunning CasperJS with: ', casperArgs);
 
   process.env.PHANTOMJS_EXECUTABLE = findExecutable('phantomjs-prebuilt', 'phantomjs');

@@ -5,6 +5,8 @@ var cwd = fs.workingDirectory;
 var system = require('system');
 var args = system.args;
 var testReportFileName = "";
+var engineType = "";
+
 if (args.length === 1) {
   console.log('Try to pass some arguments when invoking this script!');
 } else {
@@ -16,6 +18,8 @@ if (args.length === 1) {
       index = arg[0];
       if(index=="testReportFileName")
         testReportFileName = val+"-";
+      if(index=="engineType")
+        engineType = val+"-";
     }
   });
 }
@@ -25,7 +29,7 @@ var __dirname = scriptName.substring(0, scriptName.lastIndexOf('/'));
 
 var selectorNotFoundPath = __dirname + '/resources/selectorNotFound_noun_164558_cc.png';
 var hiddenSelectorPath = __dirname + '/resources/hiddenSelector_noun_63405.png';
-var genConfigPath = __dirname + '/'+testReportFileName+'config.json'; // TODO :: find a way to use that directly from the main configuration
+var genConfigPath = __dirname + '/'+engineType+testReportFileName+'config.json'; // TODO :: find a way to use that directly from the main configuration
 console.log("genConfigPath " + genConfigPath);
 
 

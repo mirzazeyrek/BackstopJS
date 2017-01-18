@@ -6,10 +6,11 @@ function extendConfig(config, userConfig) {
   ci(config, userConfig);
   htmlReport(config, userConfig);
   comparePaths(config);
+  config.engine = userConfig.engine || null;
   captureConfigPaths(config);
   casper(config, userConfig);
 
-  config.engine = userConfig.engine || null;
+
   config.report = userConfig.report || ['browser'];
   config.defaultMisMatchThreshold = 0.1;
   config.debug = userConfig.debug || false;
@@ -69,8 +70,9 @@ function comparePaths(config) {
 function captureConfigPaths(config) {
   var htmlReportSubPath = config.testReportFileName || "";
   if(htmlReportSubPath)
-    htmlReportSubPath = config.testReportFileName.replace(/\.xml$/, '')+'-';
-  config.captureConfigFileName = path.join(config.backstop, 'capture', htmlReportSubPath+'config.json');
+  htmlReportSubPath = config.testReportFileName.replace(/\.xml$/, '')+'-';
+  var engineType = (config.engine) ? config.engine + "-" : "";
+  config.captureConfigFileName = path.join(config.backstop, 'capture', engineType+htmlReportSubPath+'config.json');
 
 
 
